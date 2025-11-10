@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Активные задачи мониторинга</h2>
+
+    {% if task_data %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Псевдоним канала</th>
+                <th>Название канала</th>
+                <th>Полная дата постановки задачи</th>
+                <th>Количество сохранённых трансляций</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in task_data %}
+            <tr>
+                <td>{{ item.index }}</td>
+                <td>@{{ item.channel.handle }}</td>
+                <td>{{ item.channel.title }}</td>
+                <td>{{ item.task.created_at|date:"d.m.Y H:i:s" }}</td>
+                <td>{{ item.task.recordings_count }}</td>
+                <td class="actions">
+                    <form method="post" action="{% url 'stop_task' item.task.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Снять задачу мониторинга?')">Снять задачу</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Нет активных задач мониторинга.</p>
+    {% endif %}
+</div>
+{% endblock %}

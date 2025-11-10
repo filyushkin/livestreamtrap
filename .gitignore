@@ -1,0 +1,29 @@
+# Django
+*.log
+*.pyc
+__pycache__/
+db.sqlite3
+media/
+staticfiles/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp files
+temp/
+*.tmp
+
+# Recording files
+*.mp4
+*.mp3
+*.part

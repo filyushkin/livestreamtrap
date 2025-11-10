@@ -1,0 +1,57 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Записи трансляций</h2>
+
+    {% if download_data %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Название трансляции</th>
+                <th>Псевдоним канала</th>
+                <th>Название канала</th>
+                <th>Полная дата начала трансляции</th>
+                <th>Длительность трансляции</th>
+                <th>Ссылка</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in download_data %}
+            <tr>
+                <td>{{ item.index }}</td>
+                <td>{{ item.live_stream.title }}</td>
+                <td>@{{ item.channel.handle }}</td>
+                <td>{{ item.channel.title }}</td>
+                <td>{{ item.live_stream.actual_start_time|date:"d.m.Y H:i:s" }}</td>
+                <td>
+                    {% if item.live_stream.duration %}
+                        {{ item.live_stream.duration }}
+                    {% else %}
+                        Неизвестно
+                    {% endif %}
+                </td>
+                <td>
+                    {% if item.recording.download_url %}
+                        <a href="{{ item.recording.download_url }}" class="btn btn-download" download>Скачать MP3</a>
+                    {% else %}
+                        Недоступно
+                    {% endif %}
+                </td>
+                <td class="actions">
+                    <form method="post" action="{% url 'delete_recording' item.recording.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Удалить запись трансляции?')">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Нет сохранённых записей трансляций.</p>
+    {% endif %}
+</div>
+{% endblock %}

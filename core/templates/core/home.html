@@ -1,0 +1,100 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Добавление канала для мониторинга</h2>
+
+    <form method="post" class="channel-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.handle.id_for_label }}">Введите псевдоним канала:</label>
+            {{ form.handle }}
+            <button type="submit" class="btn btn-primary">Проверить</button>
+            <button type="button" class="btn btn-secondary" onclick="resetForm()">Сброс</button>
+        </div>
+    </form>
+
+    <h2>Отслеживаемые каналы</h2>
+
+    {% if channel_data %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Псевдоним канала</th>
+                <th>Название канала</th>
+                <th>Количество текущих трансляций</th>
+                <th>Задача поставлена?</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in channel_data %}
+            <tr>
+                <td>{{ item.index }}</td>
+                <td>@{{ item.channel.handle }}</td>
+                <td>{{ item.channel.title }}</td>
+                <td class="live-count" data-channel-id="{{ item.channel.id }}">
+                    {{ item.live_count }}
+                </td>
+                <td>
+                    {% if item.has_task %}
+                        <span class="status-yes">Да</span>
+                    {% else %}
+                        <span class="status-no">Нет</span>
+                    {% endif %}
+                </td>
+                <td class="actions">
+                    <form method="post" action="{% url 'delete_channel' item.channel.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Удалить канал?')">Удалить канал</button>
+                    </form>
+                    <form method="post" action="{% url 'toggle_monitoring' item.channel.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        {% if item.has_task %}
+                            <button type="submit" class="btn btn-warning btn-sm">Снять задачу</button>
+                        {% else %}
+                            <button type="submit" class="btn btn-success btn-sm">Поставить задачу</button>
+                        {% endif %}
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Нет добавленных каналов.</p>
+    {% endif %}
+</div>
+
+<script>
+function resetForm() {
+    document.querySelector('input[name="handle"]').value = '';
+    const messages = document.querySelector('.messages');
+    if (messages) {
+        messages.remove();
+    }
+}
+
+// Auto-update live counts
+function updateLiveCounts() {
+    fetch('{% url "get_live_counts" %}')
+        .then(response => response.json())
+        .then(data => {
+            document.querySelectorAll('.live-count').forEach(cell => {
+                const channelId = cell.getAttribute('data-channel-id');
+                if (data[channelId] !== undefined) {
+                    cell.textContent = data[channelId];
+                }
+            });
+        })
+        .catch(error => console.error('Error updating live counts:', error));
+}
+
+// Update every minute
+setInterval(updateLiveCounts, 60000);
+
+// Initial update
+document.addEventListener('DOMContentLoaded', updateLiveCounts);
+</script>
+{% endblock %}
