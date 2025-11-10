@@ -24,7 +24,13 @@ Django веб-приложение для мониторинга и записи
 
 docker-compose up --build
 
-* Запуск через 3 терминала IDE:
+* Запуск в Docker + через 3 терминала IDE:
+
+a) Docker Desktop:
+
+docker run -d --name redis-server -p 6379:6379 redis:7-alpine
+
+b) 3 терминала IDE:
 
 python manage.py runserver
 
